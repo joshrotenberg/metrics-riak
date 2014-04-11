@@ -1,4 +1,4 @@
-package com.joshrotenberg.metrics;
+package com.joshrotenberg.metrics.riak;
 
 import com.codahale.metrics.ScheduledReporter;
 
@@ -52,6 +52,7 @@ public class RiakReporter extends ScheduledReporter {
         private String host;
 	private int port;
 	private String bucket;
+	private Namer bucketNamer;
         private Locale locale;
         private Clock clock;
         private TimeZone timeZone;
@@ -64,6 +65,7 @@ public class RiakReporter extends ScheduledReporter {
 	    this.host = "127.0.0.1";
 	    this.port = 8087;
 	    this.bucket = "metrics";
+	    this.bucketNamer = null;
             this.locale = Locale.getDefault();
             this.clock = Clock.defaultClock();
             this.timeZone = TimeZone.getDefault();
@@ -102,6 +104,11 @@ public class RiakReporter extends ScheduledReporter {
 	 */
 	public Builder bucket(String bucket) {
 	    this.bucket = bucket;
+	    return this;
+	}
+
+	public Builder bucketNamer(Namer namer) {
+	    this.bucketNamer = namer;
 	    return this;
 	}
 
@@ -181,6 +188,7 @@ public class RiakReporter extends ScheduledReporter {
 				    host,
 				    port,
 				    bucket,
+				    bucketNamer,
 				    locale,
 				    clock,
 				    timeZone,
@@ -193,6 +201,7 @@ public class RiakReporter extends ScheduledReporter {
     private final String host;
     private final int port;
     private final String bucket;
+    private final Namer bucketNamer;
     private final Locale locale;
     private final Clock clock;
     private final DateFormat dateFormat;
@@ -204,6 +213,7 @@ public class RiakReporter extends ScheduledReporter {
 			 String host,
 			 int port,
 			 String bucket,
+			 Namer bucketNamer,
 			 Locale locale,
 			 Clock clock,
 			 TimeZone timeZone,
@@ -214,6 +224,7 @@ public class RiakReporter extends ScheduledReporter {
 	this.host = host;
 	this.port = port;
 	this.bucket = bucket;
+	this.bucketNamer = bucketNamer;
         this.locale = locale;
         this.clock = clock;
         this.dateFormat = DateFormat.getDateTimeInstance(DateFormat.SHORT,
@@ -226,6 +237,8 @@ public class RiakReporter extends ScheduledReporter {
 
 	pbClient = RiakFactory.pbcClient(this.host, this.port);
         riakBucket = pbClient.fetchBucket(this.bucket).execute();
+	if(this.bucketNamer != null)
+	    System.out.println(this.bucketNamer.getName("foo"));
     }
 
     @Override
